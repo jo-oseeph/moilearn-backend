@@ -6,8 +6,7 @@ const connectDB = async () => {
   try {
     // use mongoose to connect using MONGO_URI from .env
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+     
     });
 
     // if successful, log the host
