@@ -1,7 +1,9 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
+import generateToken from '../utils/generateToken.js';
 
- const registerUser = async (req, res) => {
+// ================= REGISTER ====================
+export const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
@@ -43,4 +45,42 @@ import bcrypt from 'bcryptjs';
     res.status(500).json({ message: 'Server error' });
   }
 };
-export default registerUser;
+
+// ================= LOGIN ====================
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1️⃣ Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    // 2️⃣ Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // 3️⃣ Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // 4️⃣ Generate JWT
+    const token = generateToken(user._id);
+
+    // 5️⃣ Respond with user info + token
+    res.json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      token,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
