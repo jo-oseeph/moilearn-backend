@@ -1,10 +1,10 @@
 // import mongoose library
 import mongoose from 'mongoose';
 
-// declare an async function to connect to DB
+
 const connectDB = async () => {
   try {
-    // use mongoose to connect using MONGO_URI from .env
+   
     const conn = await mongoose.connect(process.env.MONGO_URI, {
      
     });

@@ -1,13 +1,14 @@
-// Import libraries
-import express from 'express';
+// Load environment variables from .env file FIRST
 import dotenv from 'dotenv';
-import connectDB from './config/db.js';
-import authRoutes from './routes/authroutes.js';
-
-// Load environment variables from .env file
 dotenv.config();
 
-// Connect to MongoDB
+// Import libraries
+import express from 'express';
+import connectDB from './config/db.js';
+import authRoutes from './routes/authroutes.js';
+import noteRoutes from './routes/noteRoutes.js';
+
+
 connectDB();
 
 // Create express app
@@ -17,6 +18,7 @@ const app = express();
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/notes', noteRoutes);
 
 // Test route to confirm server is running
 app.get('/', (req, res) => {
