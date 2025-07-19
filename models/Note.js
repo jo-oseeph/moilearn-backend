@@ -49,6 +49,13 @@ const noteSchema = new mongoose.Schema(
       enum: ['pending', 'approved', 'rejected'],
       default: 'pending',
     },
+
+    // 👇 added downloadsCount
+    downloadsCount: {
+      type: Number,
+      default: 0,
+    },
+
   },
   { timestamps: true }
 );

@@ -63,3 +63,33 @@ export const uploadNote = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+
+export const downloadNote = async (req, res) => {
+  try {
+    const noteId = req.params.id;
+
+    // find note by _id
+    const note = await Note.findById(noteId);
+    if (!note) {
+      return res.status(404).json({ message: 'Note not found' });
+    }
+
+    // increment downloadsCount
+    note.downloadsCount += 1;
+    await note.save();
+
+    // return the file URL
+    return res.status(200).json({
+      message: 'Download URL retrieved successfully',
+      fileUrl: note.fileUrl
+    });
+
+    // (optional) — if you prefer redirect
+    // return res.redirect(note.fileUrl);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
