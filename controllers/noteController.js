@@ -93,3 +93,54 @@ export const downloadNote = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+
+
+// List pending notes
+export const listPendingNotes = async (req, res) => {
+  try {
+    const notes = await Note.find({ status: 'pending' }).populate('uploader', 'name email');
+    res.status(200).json(notes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+// Approve a note
+export const approveNote = async (req, res) => {
+  try {
+    const note = await Note.findById(req.params.id);
+
+    if (!note) {
+      return res.status(404).json({ message: 'Note not found' });
+    }
+
+    note.status = 'approved';
+    await note.save();
+
+    res.status(200).json({ message: 'Note approved', note });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+//Reject a note
+export const rejectNote = async (req, res) => {
+  try {
+    const note = await Note.findById(req.params.id);
+
+    if (!note) {
+      return res.status(404).json({ message: 'Note not found' });
+    }
+
+    note.status = 'rejected';
+    await note.save();
+
+    res.status(200).json({ message: 'Note rejected', note });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};

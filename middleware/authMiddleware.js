@@ -29,10 +29,9 @@ export const protect = async (req, res, next) => {
 };
 
 //Admin checker — must have role === 'admin'
-export const admin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
-    next(); // user is admin → continue
-  } else {
-    res.status(403).json({ message: 'Not authorized as admin' });
+export const isAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Admins only' });
   }
+  next();
 };
