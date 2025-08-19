@@ -7,7 +7,6 @@ export const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // 1️⃣ Validate input
     if (!username || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
@@ -15,7 +14,7 @@ export const registerUser = async (req, res) => {
     // 2️⃣ Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already registered' });
+      return res.status(400).json({ message: 'User already registered' });
     }
 
     // 3️⃣ Hash the password
@@ -84,3 +83,14 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// ================= LOGOUT ====================
+export const logoutUser = async (req, res) => {
+  try {
+    res.json({ message: "User logged out successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
