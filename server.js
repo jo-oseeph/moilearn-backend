@@ -6,8 +6,12 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import connectDB from './config/db.js';
-import authRoutes from './routes/authroutes.js';
+import authRoutes from './routes/authRoutes.js';
 import noteRoutes from './routes/noteRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import userRoutes from "./routes/userRoutes.js";
+
+
 
 connectDB();
 
@@ -27,6 +31,8 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', noteRoutes);
+app.use("/user", userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test route to confirm server is running
 app.get('/', (req, res) => {
