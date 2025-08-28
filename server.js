@@ -34,6 +34,7 @@ app.use('/api/notes', noteRoutes);
 app.use("/user", userRoutes);
 app.use('/api/admin', adminRoutes);
 
+
 // Test route to confirm server is running
 app.get('/', (req, res) => {
   res.send('MoiLearn Backend is running!');
