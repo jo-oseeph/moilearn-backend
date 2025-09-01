@@ -31,8 +31,9 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', noteRoutes);
-app.use("/user", userRoutes);
+app.use("/api/user", userRoutes);
 app.use('/api/admin', adminRoutes);
+ 
 
 
 // Test route to confirm server is running

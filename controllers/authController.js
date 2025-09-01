@@ -1,6 +1,6 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
-import generateToken from '../utils/generateToken.js';
+import { generateToken } from '../utils/generateToken.js';
 
 // ================= REGISTER ====================
 export const registerUser = async (req, res) => {
@@ -68,7 +68,7 @@ export const loginUser = async (req, res) => {
     }
 
     // 4️⃣ Generate JWT
-    const token = generateToken(user._id);
+   const token = generateToken(user._id, user.role);
 
     // 5️⃣ Respond with user info + token
     res.json({
