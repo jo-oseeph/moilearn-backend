@@ -19,6 +19,11 @@ const noteSchema = new mongoose.Schema(
       ],
       required: true,
     },
+     category: {
+      type: String,
+      enum: ["note", "past_paper"],
+      required: [true, "File type must be either 'note' or 'past_paper'"],
+    },
     year: {
       type: String,
       enum: ['1', '2', '3', '4'],
@@ -43,6 +48,10 @@ const noteSchema = new mongoose.Schema(
     fileUrl: {
       type: String,
       required: true,
+    },
+     mimeType: {
+      type: String,
+      required: true, // actual file format like application/pdf, image/jpeg
     },
     status: {
       type: String,

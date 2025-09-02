@@ -1,7 +1,7 @@
 import supabase from '../utils/supabaseClient.js';
 import Note from '../models/Note.js';
-import  upload  from '../middleware/uploadMiddleware.js';
 
+// Upload a note or past paper
 export const uploadNote = async (req, res) => {
   try {
     const {
@@ -10,7 +10,7 @@ export const uploadNote = async (req, res) => {
       semester,
       courseCode,
       courseTitle,
-      type,
+      category, // 👈 now using category instead of "type"
     } = req.body;
 
     const file = req.file;
@@ -21,8 +21,8 @@ export const uploadNote = async (req, res) => {
 
     const timestamp = Date.now();
     const fileExtension = file.originalname.split('.').pop();
-    const fileName = `${type}/${timestamp}_${file.originalname}`;
-    const contentType = file.mimetype;
+    const fileName = `${category}/${timestamp}_${file.originalname}`;
+    const contentType = file.mimetype; // 👈 e.g., application/pdf, image/jpeg
 
     // Upload to Supabase
     const { data, error } = await supabase.storage
@@ -46,17 +46,16 @@ export const uploadNote = async (req, res) => {
       semester,
       courseCode,
       courseTitle,
-      type,
+      category,
       fileUrl,
-      fileName,
-      fileType: contentType,
+      mimeType: contentType, // 👈 stored here
       downloadsCount: 0,
-      status: 'pending'
+      status: 'pending',
     });
 
     await note.save();
 
-    res.status(201).json({ message: 'Note uploaded successfully', note });
+    res.status(201).json({ message: 'File uploaded successfully', note });
 
   } catch (err) {
     console.error(err);
@@ -64,29 +63,26 @@ export const uploadNote = async (req, res) => {
   }
 };
 
-
+// Download note or past paper
 export const downloadNote = async (req, res) => {
   try {
     const noteId = req.params.id;
 
-    // find note by _id
     const note = await Note.findById(noteId);
     if (!note) {
-      return res.status(404).json({ message: 'Note not found' });
+      return res.status(404).json({ message: 'File not found' });
     }
 
     // increment downloadsCount
     note.downloadsCount += 1;
     await note.save();
 
-    // return the file URL
     return res.status(200).json({
       message: 'Download URL retrieved successfully',
-      fileUrl: note.fileUrl
+      fileUrl: note.fileUrl,
     });
 
-    // (optional) — if you prefer redirect
-    // return res.redirect(note.fileUrl);
+    // or redirect: res.redirect(note.fileUrl);
 
   } catch (err) {
     console.error(err);
@@ -94,9 +90,7 @@ export const downloadNote = async (req, res) => {
   }
 };
 
-
-
-// List pending notes
+// List pending uploads
 export const listPendingNotes = async (req, res) => {
   try {
     const notes = await Note.find({ status: 'pending' }).populate('uploader', 'name email');
@@ -107,38 +101,36 @@ export const listPendingNotes = async (req, res) => {
   }
 };
 
-// Approve a note
+// Approve an upload
 export const approveNote = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
-
     if (!note) {
-      return res.status(404).json({ message: 'Note not found' });
+      return res.status(404).json({ message: 'File not found' });
     }
 
     note.status = 'approved';
     await note.save();
 
-    res.status(200).json({ message: 'Note approved', note });
+    res.status(200).json({ message: 'File approved', note });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
-//Reject a note
+// Reject an upload
 export const rejectNote = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
-
     if (!note) {
-      return res.status(404).json({ message: 'Note not found' });
+      return res.status(404).json({ message: 'File not found' });
     }
 
     note.status = 'rejected';
     await note.save();
 
-    res.status(200).json({ message: 'Note rejected', note });
+    res.status(200).json({ message: 'File rejected', note });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal Server Error' });

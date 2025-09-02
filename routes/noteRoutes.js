@@ -14,10 +14,11 @@ const router = express.Router();
 
 
 router.post('/upload', protect, upload.single('file'), uploadNote);
+router.get('/moderation', protect, isAdmin, listPendingNotes);
 router.get('/:id/download', downloadNote);
 
 // admin moderation routes
-router.get('/moderation', protect, isAdmin, listPendingNotes);
+
 router.patch('/:id/approve', protect, isAdmin, approveNote);
 router.patch('/:id/reject', protect, isAdmin, rejectNote);
 
