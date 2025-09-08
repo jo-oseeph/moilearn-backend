@@ -136,3 +136,16 @@ export const rejectNote = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+// Get all uploads for the logged-in user
+export const getMyUploads = async (req, res) => {
+  try {
+    const notes = await Note.find({ uploader: req.user._id })
+      .sort({ createdAt: -1 }); // show newest first
+
+    res.status(200).json(notes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
