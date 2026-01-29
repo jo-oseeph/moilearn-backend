@@ -137,6 +137,21 @@ export const rejectNote = async (req, res) => {
   }
 };
 
+// Public: get approved notes
+export const getApprovedNotes = async (req, res) => {
+  try {
+    const notes = await Note.find({ status: 'approved' })
+      .sort({ createdAt: -1 })
+      .populate('uploader', 'username');
+
+    res.status(200).json(notes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch approved notes' });
+  }
+};
+
+
 // Get all uploads for the logged-in user
 export const getMyUploads = async (req, res) => {
   try {

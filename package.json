@@ -20,7 +20,8 @@
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.16.2",
+    "mongodb": "^7.0.0",
+    "mongoose": "^8.21.1",
     "multer": "^2.0.1",
     "multer-storage-cloudinary": "^4.0.0",
     "uuid": "^11.1.0"

@@ -41,7 +41,7 @@ export const getPendingNotes = async (req, res) => {
   try {
     const notes = await Note.find({ status: "pending" })
       .select("-file.data") // avoid returning raw file binary
-      .populate("uploadedBy", "name email");
+      .populate("uploader", "name email");
 
     res.json(notes);
   } catch (error) {
