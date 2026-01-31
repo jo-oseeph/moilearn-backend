@@ -64,31 +64,29 @@ export const uploadNote = async (req, res) => {
 };
 
 // Download note or past paper
+// Download note or past paper
 export const downloadNote = async (req, res) => {
   try {
-    const noteId = req.params.id;
+    const note = await Note.findById(req.params.id);
 
-    const note = await Note.findById(noteId);
-    if (!note) {
+    // Validate note existence and status
+    if (!note || note.status !== 'approved') {
       return res.status(404).json({ message: 'File not found' });
     }
 
-    // increment downloadsCount
+    // Increment downloads count
     note.downloadsCount += 1;
     await note.save();
 
-    return res.status(200).json({
-      message: 'Download URL retrieved successfully',
-      fileUrl: note.fileUrl,
-    });
-
-    // or redirect: res.redirect(note.fileUrl);
+    // Redirect to Supabase public file
+    return res.redirect(note.fileUrl);
 
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
 
 // List pending uploads
 export const listPendingNotes = async (req, res) => {
