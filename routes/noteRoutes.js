@@ -24,3 +24,4 @@ router.get('/:id/download', downloadNote);
 router.get('/my-uploads', protect, getMyUploads);
 
 export default router;
+ 
