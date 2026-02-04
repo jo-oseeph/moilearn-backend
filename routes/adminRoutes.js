@@ -1,7 +1,7 @@
 //adminRoutes.js
 import express from "express";
 import { protect, authorize } from "../middleware/authMiddleware.js";
-import { approveNote, rejectNote, getPendingNotes, getAdminDashboardStats } from "../controllers/adminController.js";
+import { approveNote, rejectNote, getPendingNotes, getAdminDashboardStats, deleteNote, getNotes } from "../controllers/adminController.js";
 
 const router = express.Router();
 
@@ -16,5 +16,10 @@ router.put("/notes/:id/reject", protect, authorize("admin"), rejectNote);
 
 //Admin stats
 router.get("/dashboard", protect, authorize("admin"),  getAdminDashboardStats);
+
+// Admin: delete a note
+router.delete("/notes/:id", protect, authorize("admin"), deleteNote);
+
+router.get("/notes", protect, authorize("admin"), getNotes);
 
 export default router;

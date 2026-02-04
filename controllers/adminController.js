@@ -1,6 +1,8 @@
 // controllers/adminController.js
 import Note from "../models/Note.js";
 import User from "../models/User.js";
+import supabase from "../utils/supabaseClient.js";
+import { extractSupabasePath } from "../utils/extractSupabasePath.js";
 
 // Approve note
 export const approveNote = async (req, res) => {
@@ -57,7 +59,7 @@ export const getPendingNotes = async (req, res) => {
   }
 };
 
-// ✅ Admin dashboard stats (ONLY stats)
+// Admin dashboard stats (ONLY stats)
 export const getAdminDashboardStats = async (req, res) => {
   try {
     const [
@@ -88,5 +90,59 @@ export const getAdminDashboardStats = async (req, res) => {
     res.status(500).json({
       message: "Failed to fetch dashboard stats",
     });
+  }
+};
+// Admin delete actions
+
+
+export const deleteNote = async (req, res) => {
+  try {
+    const note = await Note.findById(req.params.id);
+
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
+    const filePath = extractSupabasePath(note.fileUrl);
+
+    if (!filePath) {
+      return res.status(400).json({ message: "Invalid file URL" });
+    }
+
+    const bucket = filePath.split("/")[0];
+    const pathInBucket = filePath.replace(`${bucket}/`, "");
+
+    const { error } = await supabase.storage
+      .from(bucket)
+      .remove([pathInBucket]);
+
+    if (error) {
+      console.error("Supabase delete error:", error);
+      return res.status(500).json({ message: "Failed to delete file from storage" });
+    }
+
+    await note.deleteOne();
+
+    res.json({ message: "Note and file permanently deleted" });
+  } catch (error) {
+    console.error("Delete note error:", error);
+    res.status(500).json({ message: "Server error deleting note" });
+  }
+};
+
+// adminController.js
+export const getNotes = async (req, res) => {
+  try {
+    const { status } = req.query; // optional: pending, approved, rejected, all
+    let filter = {};
+
+    if (status && status !== "all") {
+      filter.status = status;
+    }
+
+    const notes = await Note.find(filter).sort({ createdAt: -1 });
+    res.json(notes);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
