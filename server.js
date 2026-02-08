@@ -43,7 +43,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', noteRoutes);
-app.use("/api/user", userRoutes);
+app.use('/api/user', userRoutes);  // This handles /api/user/profile, /api/user/stats, etc.
 app.use('/api/admin', adminRoutes);
 
 // Health check

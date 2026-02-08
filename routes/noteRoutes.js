@@ -23,7 +23,7 @@ router.post('/upload', protect, upload.single('file'), uploadNote);
 router.get('/:id/download', downloadNote);
 
 // Preview
-router.get('/:id/preview', previewNote);
+router.get('/:id/preview', previewNote); 
 
 // User uploads
 router.get('/my-uploads', protect, getMyUploads);
