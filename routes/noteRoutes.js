@@ -4,14 +4,16 @@ import {
   getMyUploads,
   downloadNote,
   getApprovedNotes,
+  previewNote,
 } from '../controllers/noteController.js';
-
 import { protect } from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
 
+
 const router = express.Router();
 
-// ✅ PUBLIC: approved notes
+
+//PUBLIC: approved notes
 router.get('/', getApprovedNotes);
 
 // Upload
@@ -19,6 +21,9 @@ router.post('/upload', protect, upload.single('file'), uploadNote);
 
 // Download
 router.get('/:id/download', downloadNote);
+
+// Preview
+router.get('/:id/preview', previewNote);
 
 // User uploads
 router.get('/my-uploads', protect, getMyUploads);

@@ -64,7 +64,6 @@ export const uploadNote = async (req, res) => {
 };
 
 // Download note or past paper
-// Download note or past paper
 export const downloadNote = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
@@ -78,7 +77,44 @@ export const downloadNote = async (req, res) => {
     note.downloadsCount += 1;
     await note.save();
 
-    // Redirect to Supabase public file
+    // Fetch the file from Supabase
+    const response = await fetch(note.fileUrl);
+    
+    if (!response.ok) {
+      return res.status(500).json({ message: 'Failed to fetch file from storage' });
+    }
+
+    const fileBuffer = await response.arrayBuffer();
+    
+    // Extract filename from the fileUrl or use a default
+    const urlParts = note.fileUrl.split('/');
+    const filename = urlParts[urlParts.length - 1] || `${note.courseCode}_${note.courseTitle}.pdf`;
+    
+    // Set headers to force download
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', note.mimeType || 'application/octet-stream');
+    res.setHeader('Content-Length', fileBuffer.byteLength);
+    
+    // Send the file
+    return res.send(Buffer.from(fileBuffer));
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+// Preview note (opens in browser without incrementing download count)
+export const previewNote = async (req, res) => {
+  try {
+    const note = await Note.findById(req.params.id);
+
+    // Validate note existence and status
+    if (!note || note.status !== 'approved') {
+      return res.status(404).json({ message: 'File not found' });
+    }
+
+    // Redirect to Supabase URL for preview (opens in browser)
     return res.redirect(note.fileUrl);
 
   } catch (err) {
