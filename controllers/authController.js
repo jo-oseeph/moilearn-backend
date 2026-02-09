@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../utils/generateToken.js';
+import admin from '../utils/firebaseAdmin.js'; // path to firebase admin
 
 // ================= REGISTER ====================
 export const registerUser = async (req, res) => {
@@ -83,6 +84,55 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+//google login
+
+export const googleLogin = async (req, res) => {
+  try {
+    const { token: firebaseToken } = req.body;
+
+    if (!firebaseToken) {
+      return res.status(400).json({ message: "Firebase token is required" });
+    }
+
+    // 1️⃣ Verify Firebase ID token
+    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const { email, name, uid } = decodedToken;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email not found in Firebase token" });
+    }
+
+    // 2️⃣ Check if user exists in DB
+    let user = await User.findOne({ email });
+
+    // 3️⃣ If not, create a new user
+    if (!user) {
+      user = new User({
+        username: name || email.split("@")[0],
+        email,
+        password: uid, // dummy password, will not be used
+      });
+      await user.save();
+    }
+
+    // 4️⃣ Generate JWT (your existing system)
+    const token = generateToken(user._id, user.role);
+
+    // 5️⃣ Respond with same structure as normal login
+    res.json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      token,
+    });
+  } catch (err) {
+    console.error("Google login error:", err);
+    res.status(500).json({ message: "Google login failed" });
+  }
+};
+
 
 // ================= LOGOUT ====================
 export const logoutUser = async (req, res) => {
