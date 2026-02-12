@@ -1,7 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../utils/generateToken.js';
-import admin from '../utils/firebaseAdmin.js'; // path to firebase admin
+import admin from '../utils/firebaseAdmin.js';
 
 // ================= REGISTER ====================
 export const registerUser = async (req, res) => {
@@ -12,27 +12,28 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // 2️⃣ Check if user already exists
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already registered' });
     }
 
-    // 3️⃣ Hash the password
+    // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 4️⃣ Create new user
+    // Create new user
     const user = new User({
       username,
       email,
-      password: hashedPassword, // store hashed password
+      password: hashedPassword,
+      authMethods: ['email'], // Set auth method
     });
 
-    // 5️⃣ Save user to DB
+    // Save user to DB
     const savedUser = await user.save();
 
-    // 6️⃣ Respond with user data (omit password)
+    // Respond with user data (omit password)
     res.status(201).json({
       _id: savedUser._id,
       username: savedUser.username,
@@ -51,27 +52,34 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1️⃣ Validate input
+    // Validate input
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    // 2️⃣ Find user by email
+    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // 3️⃣ Compare password
+    // Check if user has password auth enabled
+    if (!user.authMethods.includes('email') || !user.password) {
+      return res.status(401).json({ 
+        message: 'This account uses Google sign-in. Please use "Continue with Google"' 
+      });
+    }
+
+    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // 4️⃣ Generate JWT
-   const token = generateToken(user._id, user.role);
+    // Generate JWT
+    const token = generateToken(user._id, user.role);
 
-    // 5️⃣ Respond with user info + token
+    // Respond with user info + token
     res.json({
       _id: user._id,
       username: user.username,
@@ -85,8 +93,7 @@ export const loginUser = async (req, res) => {
   }
 };
 
-//google login
-
+// ================= GOOGLE LOGIN (SEAMLESS) ====================
 export const googleLogin = async (req, res) => {
   try {
     const { token: firebaseToken } = req.body;
@@ -97,42 +104,72 @@ export const googleLogin = async (req, res) => {
 
     // 1️⃣ Verify Firebase ID token
     const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
-    const { email, name, uid } = decodedToken;
+    const { email, name, picture, uid } = decodedToken;
 
     if (!email) {
       return res.status(400).json({ message: "Email not found in Firebase token" });
     }
 
-    // 2️⃣ Check if user exists in DB
+    // 2️⃣ Check if user exists by EMAIL (regardless of auth method)
     let user = await User.findOne({ email });
 
-    // 3️⃣ If not, create a new user
-    if (!user) {
+    if (user) {
+      // ✅ USER EXISTS - Auto-merge accounts
+      
+      // Add 'google' to authMethods if not already there
+      if (!user.authMethods.includes('google')) {
+        user.authMethods.push('google');
+      }
+      
+      // Update Google-specific fields
+      user.googleId = uid;
+      if (picture && !user.profilePicture) {
+        user.profilePicture = picture;
+      }
+      
+      await user.save();
+      
+      console.log(`✅ Existing user ${email} signed in with Google (auto-merged)`);
+      
+    } else {
+      // ✅ NEW USER - Create account with Google
       user = new User({
         username: name || email.split("@")[0],
         email,
-        password: uid, // dummy password, will not be used
+        googleId: uid,
+        profilePicture: picture,
+        authMethods: ['google'], // Google-only account
+        // No password needed for Google-only accounts
       });
+      
       await user.save();
+      console.log(`✅ New user created via Google: ${email}`);
     }
 
-    // 4️⃣ Generate JWT (your existing system)
+    // 3️⃣ Generate JWT (your existing system)
     const token = generateToken(user._id, user.role);
 
-    // 5️⃣ Respond with same structure as normal login
+    // 4️⃣ Respond with same structure as normal login
     res.json({
       _id: user._id,
       username: user.username,
       email: user.email,
       role: user.role,
       token,
+      profilePicture: user.profilePicture,
+      authMethods: user.authMethods, // Send available auth methods
     });
   } catch (err) {
     console.error("Google login error:", err);
+    
+    // Handle specific Firebase errors
+    if (err.code === 'auth/id-token-expired') {
+      return res.status(401).json({ message: "Session expired. Please sign in again." });
+    }
+    
     res.status(500).json({ message: "Google login failed" });
   }
 };
-
 
 // ================= LOGOUT ====================
 export const logoutUser = async (req, res) => {
@@ -143,4 +180,3 @@ export const logoutUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
