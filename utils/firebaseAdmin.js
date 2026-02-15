@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import admin from "firebase-admin";
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -9,28 +9,41 @@ const __dirname = dirname(__filename);
 
 if (!admin.apps.length) {
   try {
-    // Try Render's secret file location first
     let serviceAccount;
+    let loadedFrom = '';
     
-    try {
-      serviceAccount = JSON.parse(readFileSync('/etc/secrets/service-account.json', 'utf8'));
-      console.log('✅ Firebase Admin initialized from Render secret file');
-    } catch {
-      // Fallback to local development path
-      const localPath = join(__dirname, '..', 'service-account.json');
-      serviceAccount = JSON.parse(readFileSync(localPath, 'utf8'));
-      console.log('✅ Firebase Admin initialized from local service-account.json');
+    // Try multiple paths in order
+    const possiblePaths = [
+      '/etc/secrets/service-account.json',  // Render secret file location
+      join(__dirname, '..', 'service-account.json'),  // Local development
+      './service-account.json',  // Alternative local path
+    ];
+    
+    for (const path of possiblePaths) {
+      if (existsSync(path)) {
+        serviceAccount = JSON.parse(readFileSync(path, 'utf8'));
+        loadedFrom = path;
+        break;
+      }
     }
     
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
+    if (serviceAccount) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+      console.log(`✅ Firebase Admin initialized from: ${loadedFrom}`);
+    } else {
+      throw new Error('service-account.json not found in any expected location');
+    }
     
   } catch (fileError) {
     // Fallback to environment variables
     console.log('⚠️ JSON file not found, using .env variables...');
+    console.log('Error:', fileError.message);
     
     if (!process.env.FIREBASE_PRIVATE_KEY) {
+      console.error('❌ FIREBASE_PRIVATE_KEY is missing from environment variables');
+      console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('FIREBASE')));
       throw new Error("FIREBASE_PRIVATE_KEY is missing");
     }
     
