@@ -1,3 +1,4 @@
 
 .env
 config/firebaseServiceAccountKey.json
+service-account.json
