@@ -12,7 +12,6 @@ if (!admin.apps.length) {
     let serviceAccount;
     let loadedFrom = '';
     
-    // Try multiple paths in order
     const possiblePaths = [
       '/etc/secrets/service-account.json',  // Render secret file location
       join(__dirname, '..', 'service-account.json'),  // Local development
