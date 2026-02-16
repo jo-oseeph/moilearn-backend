@@ -12,7 +12,6 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already registered' });
@@ -93,7 +92,7 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// ================= GOOGLE LOGIN (SEAMLESS) ====================
+// ================= GOOGLE LOGIN  ====================
 export const googleLogin = async (req, res) => {
   try {
     const { token: firebaseToken } = req.body;
@@ -102,7 +101,7 @@ export const googleLogin = async (req, res) => {
       return res.status(400).json({ message: "Firebase token is required" });
     }
 
-    // 1️⃣ Verify Firebase ID token
+    //Verify Firebase ID token
     const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
     const { email, name, picture, uid } = decodedToken;
 
@@ -110,11 +109,10 @@ export const googleLogin = async (req, res) => {
       return res.status(400).json({ message: "Email not found in Firebase token" });
     }
 
-    // 2️⃣ Check if user exists by EMAIL (regardless of auth method)
+    //Check if user exists by EMAIL (regardless of auth method)
     let user = await User.findOne({ email });
 
     if (user) {
-      // ✅ USER EXISTS - Auto-merge accounts
       
       // Add 'google' to authMethods if not already there
       if (!user.authMethods.includes('google')) {
@@ -132,7 +130,7 @@ export const googleLogin = async (req, res) => {
       console.log(`✅ Existing user ${email} signed in with Google (auto-merged)`);
       
     } else {
-      // ✅ NEW USER - Create account with Google
+      //NEW USER - Create account with Google
       user = new User({
         username: name || email.split("@")[0],
         email,
@@ -146,10 +144,10 @@ export const googleLogin = async (req, res) => {
       console.log(`✅ New user created via Google: ${email}`);
     }
 
-    // 3️⃣ Generate JWT (your existing system)
+    // Generate JWT (your existing system)
     const token = generateToken(user._id, user.role);
 
-    // 4️⃣ Respond with same structure as normal login
+    // Respond with same structure as normal login
     res.json({
       _id: user._id,
       username: user.username,

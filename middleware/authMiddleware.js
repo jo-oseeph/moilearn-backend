@@ -19,7 +19,7 @@ export const protect = async (req, res, next) => {
         return res.status(401).json({ message: "User not found" });
       }
 
-      next(); // logged in → continue
+      next(); 
     } catch (error) {
       console.error(error);
       return res.status(401).json({ message: "Not authorized, token failed" });
