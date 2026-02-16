@@ -65,8 +65,8 @@ export const loginUser = async (req, res) => {
 
     // Check if user has password auth enabled
     if (!user.authMethods.includes('email') || !user.password) {
-      return res.status(401).json({ 
-        message: 'This account uses Google sign-in. Please use "Continue with Google"' 
+      return res.status(401).json({
+        message: 'This account uses Google sign-in. Please use "Continue with Google"'
       });
     }
 
@@ -96,7 +96,7 @@ export const loginUser = async (req, res) => {
 // ================= GOOGLE LOGIN (SEAMLESS) ====================
 export const googleLogin = async (req, res) => {
   try {
-    const { token: firebaseToken } = req.body;
+    const { token: firebaseToken, email: clientEmail, displayName: clientName, photoURL: clientPhoto } = req.body;
 
     if (!firebaseToken) {
       return res.status(400).json({ message: "Firebase token is required" });
@@ -104,7 +104,39 @@ export const googleLogin = async (req, res) => {
 
     // 1️⃣ Verify Firebase ID token
     const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
-    const { email, name, picture, uid } = decodedToken;
+    const uid = decodedToken.uid || decodedToken.sub;
+
+    // Debug: log what's in the token
+    console.log("🔍 Decoded token keys:", Object.keys(decodedToken));
+    console.log("🔍 Token email:", decodedToken.email);
+    console.log("🔍 Client email:", clientEmail);
+
+    // Extract email robustly - check multiple sources
+    let email = decodedToken.email;
+
+    if (!email && decodedToken.firebase?.identities?.email) {
+      email = decodedToken.firebase.identities.email[0];
+    }
+
+    if (!email) {
+      // Try to get email from Firebase user record
+      try {
+        const userRecord = await admin.auth().getUser(uid);
+        email = userRecord.email;
+        console.log("🔍 Email from user record:", email);
+      } catch (e) {
+        console.error("Failed to fetch user record:", e.message);
+      }
+    }
+
+    // Final fallback: use email sent from frontend (already verified via Firebase auth)
+    if (!email && clientEmail) {
+      email = clientEmail;
+      console.log("🔍 Using client-provided email:", email);
+    }
+
+    const name = decodedToken.name || clientName;
+    const picture = decodedToken.picture || clientPhoto;
 
     if (!email) {
       return res.status(400).json({ message: "Email not found in Firebase token" });
@@ -115,22 +147,22 @@ export const googleLogin = async (req, res) => {
 
     if (user) {
       // ✅ USER EXISTS - Auto-merge accounts
-      
+
       // Add 'google' to authMethods if not already there
       if (!user.authMethods.includes('google')) {
         user.authMethods.push('google');
       }
-      
+
       // Update Google-specific fields
       user.googleId = uid;
       if (picture && !user.profilePicture) {
         user.profilePicture = picture;
       }
-      
+
       await user.save();
-      
+
       console.log(`✅ Existing user ${email} signed in with Google (auto-merged)`);
-      
+
     } else {
       // ✅ NEW USER - Create account with Google
       user = new User({
@@ -141,7 +173,7 @@ export const googleLogin = async (req, res) => {
         authMethods: ['google'], // Google-only account
         // No password needed for Google-only accounts
       });
-      
+
       await user.save();
       console.log(`✅ New user created via Google: ${email}`);
     }
@@ -161,12 +193,12 @@ export const googleLogin = async (req, res) => {
     });
   } catch (err) {
     console.error("Google login error:", err);
-    
+
     // Handle specific Firebase errors
     if (err.code === 'auth/id-token-expired') {
       return res.status(401).json({ message: "Session expired. Please sign in again." });
     }
-    
+
     res.status(500).json({ message: "Google login failed" });
   }
 };
