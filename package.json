@@ -23,8 +23,10 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",
     "mongoose": "^8.21.1",
-    "multer": "^2.0.1",
+    "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
+    "node-fetch": "^2.7.0",
+    "pdf-lib": "^1.17.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
