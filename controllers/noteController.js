@@ -40,149 +40,192 @@ const convertImageToPDF = async (imageBuffer, mimetype) => {
 // Upload note or past paper
 export const uploadNote = async (req, res) => {
 
-  try {
+try {
 
-    const {
-      school,
-      year,
-      semester,
-      courseCode,
-      courseTitle,
-      category,
-    } = req.body;
+const {
+school,
+year,
+semester,
+courseCode,
+courseTitle,
+category,
+} = req.body;
 
-    const file = req.file;
+const files = req.files;
 
-    if (!file)
-      return res.status(400).json({
-        message: "No file uploaded",
-      });
+if (!files || files.length === 0)
+return res.status(400).json({
+message: "No files uploaded",
+});
 
+const mergedPdf = await PDFDocument.create();
 
 
-    let finalBuffer;
-    let finalMime = "application/pdf";
+// PROCESS EACH FILE
+for (const file of files) {
 
+let filePdf;
 
+try {
 
-    // LOGIC 1
-    // if uploaded file is image → convert to pdf
 
-    if (file.mimetype.startsWith("image/")) {
+// IMAGE → convert to PDF first
+if (file.mimetype.startsWith("image/")) {
 
-      finalBuffer = await convertImageToPDF(
-        file.buffer,
-        file.mimetype
-      );
+const imgPdfBytes =
+await convertImageToPDF(
+file.buffer,
+file.mimetype
+);
 
-    }
+filePdf =
+await PDFDocument.load(imgPdfBytes);
 
+}
 
-    // LOGIC 2
-    // if already pdf → use as is
 
-    else if (file.mimetype === "application/pdf") {
+// PDF → load directly
+else if (file.mimetype === "application/pdf") {
 
-      finalBuffer = file.buffer;
+filePdf =
+await PDFDocument.load(file.buffer);
 
-    }
+}
 
-    else {
 
-      return res.status(400).json({
-        message: "Only image or PDF allowed",
-      });
+else {
 
-    }
+return res.status(400).json({
+message:
+"Only image and PDF allowed",
+});
 
+}
 
 
+// copy pages
+const pages =
+await mergedPdf.copyPages(
+filePdf,
+filePdf.getPageIndices()
+);
 
-    // upload to cloudinary
+pages.forEach(page =>
+mergedPdf.addPage(page)
+);
 
-    const uploadResult =
-      await cloudinary.uploader.upload_stream(
-        {
 
-          resource_type: "raw",
+}
 
-          folder: `moilearn/${category}`,
+catch (error) {
 
-          public_id: `${courseCode}_${uuid()}`,
+console.error(
+"File processing error:",
+error
+);
 
-          format: "pdf",
+return res.status(500).json({
+message:
+"Error processing uploaded file",
+});
 
-        },
+}
 
+}
 
-        async (error, result) => {
 
-          if (error)
-            return res.status(500).json({
-              message: "Cloudinary upload failed",
-            });
 
+// FINAL MERGED PDF
+const finalBuffer =
+await mergedPdf.save();
 
 
-          // save in mongodb
 
-          const note = new Note({
 
-            uploader: req.user._id,
+// UPLOAD TO CLOUDINARY
+const uploadStream =
+cloudinary.uploader.upload_stream(
+{
+resource_type: "raw",
+folder: `moilearn/${category}`,
+public_id:
+`${courseCode}_${uuid()}`,
+format: "pdf",
+},
 
-            school,
+async (error, result) => {
 
-            year,
+if (error) {
 
-            semester,
+console.error(error);
 
-            courseCode,
+return res.status(500).json({
+message:
+"Cloudinary upload failed",
+});
 
-            courseTitle,
+}
 
-            category,
 
-            fileUrl: result.secure_url,
+const note = new Note({
 
-            mimeType: finalMime,
+uploader: req.user._id,
 
-          });
+school,
 
-          await note.save();
+year,
 
+semester,
 
+courseCode,
 
-          return res.status(201).json({
+courseTitle,
 
-            message: "Uploaded successfully",
+category,
 
-            note,
+fileUrl:
+result.secure_url,
 
-          });
+mimeType:
+"application/pdf",
 
-        }
+});
 
-      );
 
+await note.save();
 
 
-    uploadResult.end(finalBuffer);
+return res.status(201).json({
 
+message:
+"Uploaded successfully",
 
+note,
 
-  } catch (err) {
+});
 
-    console.error(err);
+}
 
-    res.status(500).json({
-      message: "Internal Server Error",
-    });
+);
 
-  }
+
+uploadStream.end(finalBuffer);
+
+
+}
+
+catch (err) {
+
+console.error(err);
+
+res.status(500).json({
+message:
+"Internal Server Error",
+});
+
+}
 
 };
-
-
 
 
 // Download

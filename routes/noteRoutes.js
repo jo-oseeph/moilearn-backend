@@ -17,7 +17,7 @@ const router = express.Router();
 router.get('/', getApprovedNotes);
 
 // Upload
-router.post('/upload', protect, upload.single('file'), uploadNote);
+router.post('/upload', protect, upload.array('files'), uploadNote);
 
 // Download
 router.get('/:id/download', downloadNote);
