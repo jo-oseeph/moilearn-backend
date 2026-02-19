@@ -4,7 +4,7 @@ import { PDFDocument } from "pdf-lib";
 import { v4 as uuid } from "uuid";
 
 
-// helper function
+
 // converts image buffer to PDF buffer
 const convertImageToPDF = async (imageBuffer, mimetype) => {
 
