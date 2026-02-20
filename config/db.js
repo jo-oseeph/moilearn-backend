@@ -1,4 +1,3 @@
-// import mongoose library
 import mongoose from 'mongoose';
 
 
@@ -17,5 +16,4 @@ const connectDB = async () => {
   }
 };
 
-// export the function as default so it can be imported elsewhere
 export default connectDB;

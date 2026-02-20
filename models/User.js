@@ -22,10 +22,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      // Password is only required for email/password auth, not for Google-only users
       required: function() {
-        // If user has 'email' in authMethods, password is required
-        // If user only has 'google' in authMethods, password is NOT required
         return this.authMethods && this.authMethods.includes('email');
       },
       minlength: [6, 'Password must be at least 6 characters long'],
@@ -35,23 +32,9 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user', 
     },
-    authMethods: {
-      type: [String],
-      enum: ['email', 'google'],
-      default: ['email'], // By default, users sign up with email
-    },
-    googleId: {
-      type: String,
-      sparse: true, // Allows multiple null values, but enforces uniqueness when set
-      unique: true,
-    },
-    profilePicture: {
-      type: String,
-      default: null,
-    },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt
+    timestamps: true, 
   }
 );
 

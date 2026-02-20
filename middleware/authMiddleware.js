@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-// Middleware: Protect routes — only logged-in users
+// Protect routes — only logged-in users
 export const protect = async (req, res, next) => {
   let token;
 
@@ -39,6 +39,5 @@ export const authorize = (...roles) => {
   };
 };
 
-// Convenience middlewares
 export const isAdmin = authorize("admin");
 export const isUser = authorize("user");
