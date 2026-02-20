@@ -1,8 +1,6 @@
 // controllers/adminController.js
 import Note from "../models/Note.js";
 import User from "../models/User.js";
-import supabase from "../utils/supabaseClient.js";
-import { extractSupabasePath } from "../utils/extractSupabasePath.js";
 
 // Approve note
 export const approveNote = async (req, res) => {

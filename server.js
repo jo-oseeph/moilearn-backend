@@ -1,5 +1,4 @@
 import "dotenv/config";
-
 import express from 'express';
 import cors from 'cors';
 import connectDB from './config/db.js';
@@ -18,14 +17,14 @@ const app = express();
 // Allowed origins for CORS
 const allowedOrigins = [
   "http://localhost:3000",
-  "http://localhost:5173",   // Vite dev server
-  process.env.CLIENT_URL      // Production frontend from Render env
+  "http://localhost:5173",   
+  process.env.CLIENT_URL     
 ].filter(Boolean);
 
 // Middleware: Enable CORS with credentials
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Postman / server requests
+    if (!origin) return callback(null, true); 
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -43,15 +42,8 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', noteRoutes);
-app.use('/api/user', userRoutes);  // This handles /api/user/profile, /api/user/stats, etc.
+app.use('/api/user', userRoutes);  
 app.use('/api/admin', adminRoutes);
-
-// Health check
-app.get('/', (req, res) => {
-  res.send('MoiLearn Backend is running!');
-});
-
-// Add this AFTER your existing routes (before app.listen)
 
 
 const PORT = process.env.PORT || 5000;
