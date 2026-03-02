@@ -168,29 +168,17 @@ message:
 
 
 const note = new Note({
-
-uploader: req.user._id,
-
-school,
-
-year,
-
-semester,
-
-courseCode,
-
-courseTitle,
-
-category,
-
-fileUrl:
-result.secure_url,
-
-mimeType:
-"application/pdf",
-
+  uploader: req.user._id,
+  school,
+  year,
+  semester,
+  courseCode,
+  courseTitle,
+  category,
+  fileUrl: result.secure_url,
+  cloudinaryPublicId: result.public_id,
+  mimeType: "application/pdf",
 });
-
 
 await note.save();
 
@@ -230,7 +218,7 @@ message:
 
 // Download
 
-import fetch from "node-fetch"; // make sure to install: npm i node-fetch@2
+import fetch from "node-fetch"; 
 
 export const downloadNote = async (req, res) => {
   try {
@@ -328,3 +316,5 @@ export const getMyUploads = async (req, res) => {
   res.json(notes);
 
 };
+
+

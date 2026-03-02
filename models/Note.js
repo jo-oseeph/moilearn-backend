@@ -64,6 +64,10 @@ const noteSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    cloudinaryPublicId: {
+  type: String,
+  required: true,
+},
 
   },
   { timestamps: true }

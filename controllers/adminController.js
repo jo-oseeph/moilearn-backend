@@ -1,6 +1,6 @@
-// controllers/adminController.js
 import Note from "../models/Note.js";
 import User from "../models/User.js";
+import cloudinary from "../utils/cloudinary.js";
 
 // Approve note
 export const approveNote = async (req, res) => {
@@ -57,7 +57,7 @@ export const getPendingNotes = async (req, res) => {
   }
 };
 
-// Admin dashboard stats (ONLY stats)
+// Admin dashboard stats
 export const getAdminDashboardStats = async (req, res) => {
   try {
     const [
@@ -90,9 +90,8 @@ export const getAdminDashboardStats = async (req, res) => {
     });
   }
 };
+
 // Admin delete actions
-
-
 export const deleteNote = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
@@ -101,32 +100,22 @@ export const deleteNote = async (req, res) => {
       return res.status(404).json({ message: "Note not found" });
     }
 
-    const filePath = extractSupabasePath(note.fileUrl);
+    // Delete from Cloudinary
+    await cloudinary.uploader.destroy(
+      note.cloudinaryPublicId,
+      { resource_type: "raw" }
+    );
 
-    if (!filePath) {
-      return res.status(400).json({ message: "Invalid file URL" });
-    }
-
-    const bucket = filePath.split("/")[0];
-    const pathInBucket = filePath.replace(`${bucket}/`, "");
-
-    const { error } = await supabase.storage
-      .from(bucket)
-      .remove([pathInBucket]);
-
-    if (error) {
-      console.error("Supabase delete error:", error);
-      return res.status(500).json({ message: "Failed to delete file from storage" });
-    }
-
+    // Delete from MongoDB
     await note.deleteOne();
 
     res.json({ message: "Note and file permanently deleted" });
+
   } catch (error) {
     console.error("Delete note error:", error);
     res.status(500).json({ message: "Server error deleting note" });
   }
-};
+}; 
 
 // adminController.js
 export const getNotes = async (req, res) => {
