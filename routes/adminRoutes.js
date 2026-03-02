@@ -1,4 +1,3 @@
-
 import express from "express";
 import { protect, authorize } from "../middleware/authMiddleware.js";
 import { approveNote, rejectNote, getPendingNotes, getAdminDashboardStats, deleteNote, getNotes } from "../controllers/adminController.js";
