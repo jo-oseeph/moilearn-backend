@@ -3,23 +3,19 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
 
 
-// ======================================================
-// REGISTER USER
-// ======================================================
 // Creates a new user account using email and password
-// ======================================================
+
 export const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // 1. Validate required fields
     if (!username || !email || !password) {
       return res.status(400).json({
         message: "Username, email, and password are required",
       });
     }
 
-    // 2. Check if user already exists
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -28,22 +24,22 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // 3. Hash password before saving
-    // Never store plain passwords
+    // Hash password before saving
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 4. Create new user document
+    // Create new user document
     const user = new User({
       username,
       email,
       password: hashedPassword,
     });
 
-    // 5. Save user to database
+    // Save user to database
     const savedUser = await user.save();
 
-    // 6. Send response (never send password)
+    // Send response (never send password)
     res.status(201).json({
       message: "User registered successfully",
 
@@ -65,13 +61,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
-
-// ======================================================
-// LOGIN USER
-// ======================================================
 // Authenticates user using email and password
-// ======================================================
 export const loginUser = async (req, res) => {
 
   try {
@@ -114,9 +104,7 @@ export const loginUser = async (req, res) => {
 
 
     // 4. Generate JWT token
-    // Token contains user ID and role
     const token = generateToken(user._id, user.role);
-
 
 
     // 5. Send success response
@@ -151,12 +139,7 @@ export const loginUser = async (req, res) => {
 
 
 
-
-// ======================================================
 // LOGOUT USER
-// ======================================================
-// Stateless logout (JWT handled on frontend)
-// ======================================================
 export const logoutUser = async (req, res) => {
 
   try {
@@ -175,4 +158,4 @@ export const logoutUser = async (req, res) => {
 
   }
 
-};
+}; 
