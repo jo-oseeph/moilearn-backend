@@ -9,7 +9,6 @@ import userRoutes from "./routes/userRoutes.js";
 import publicStatsRoutes from "./routes/publicStatsRoutes.js";
 
 
-// Connect to database
 connectDB();
 
 // Create express app
