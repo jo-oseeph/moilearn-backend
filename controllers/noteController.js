@@ -37,7 +37,7 @@ const convertImageToPDF = async (imageBuffer, mimetype) => {
 
 
 
-// Upload note or past paper
+// upload past paper
 export const uploadNote = async (req, res) => {
 
 try {
@@ -49,6 +49,7 @@ semester,
 courseCode,
 courseTitle,
 category,
+examYear,
 } = req.body;
 
 const files = req.files;
@@ -175,6 +176,7 @@ const note = new Note({
   courseCode,
   courseTitle,
   category,
+  examYear,
   fileUrl: result.secure_url,
   cloudinaryPublicId: result.public_id,
   mimeType: "application/pdf",
