@@ -19,6 +19,10 @@ const noteSchema = new mongoose.Schema(
       ],
       required: true,
     },
+    examYear: {
+  type: Number,
+  required: true
+},
      category: {
       type: String,
       enum: ["note", "past_paper"],
