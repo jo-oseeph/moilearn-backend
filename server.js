@@ -15,24 +15,33 @@ connectDB();
 const app = express();
 
 // Allowed origins for CORS
+// Allowed base origins
 const allowedOrigins = [
   "http://localhost:3000",
-  "http://localhost:5173",   
-  process.env.CLIENT_URL     
-].filter(Boolean);
+  "https://moilearn.vercel.app"
+];
 
-// Middleware: Enable CORS with credentials
+// Enable CORS with dynamic origin check
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); 
 
+    // Allow requests with no origin (like Postman or server-to-server)
+    if (!origin) return callback(null, true);
+
+    // Allow exact matches
     if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`Origin ${origin} not allowed by CORS`));
+      return callback(null, true);
     }
+
+    // Allow all Vercel preview deployments for your project
+    if (origin.endsWith(".vercel.app")) {
+      return callback(null, true);
+    }
+
+    console.log("Blocked by CORS:", origin);
+    callback(new Error(`Origin ${origin} not allowed by CORS`));
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
 
