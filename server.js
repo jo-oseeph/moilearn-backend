@@ -24,7 +24,7 @@ const allowedOrigins = [
 app.use(cors({
   origin: function (origin, callback) {
 
-    // Allow requests with no origin (like Postman or server-to-server)
+    // Allow requests with no origin 
     if (!origin) return callback(null, true);
 
     // Allow exact matches
