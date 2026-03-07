@@ -15,7 +15,6 @@ connectDB();
 const app = express();
 
 // Allowed origins for CORS
-// Allowed base origins
 const allowedOrigins = [
   "http://localhost:3000",
   "https://moilearn.vercel.app"
