@@ -27,6 +27,7 @@ app.use(cors({
     // Allow requests with no origin 
     if (!origin) return callback(null, true);
 
+    
     // Allow exact matches
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
