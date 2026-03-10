@@ -263,32 +263,23 @@ export const downloadNote = async (req, res) => {
 // preview
 
 export const previewNote = async (req, res) => {
-
   try {
+    const note = await Note.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { previewCount: 1 } },
+      { new: true }
+    );
 
-    const note = await Note.findById(req.params.id);
-
-    if (!note || note.status !== "approved")
-      return res.status(404).json({
-        message: "File not found",
-      });
-
-
+    if (!note || note.status !== "approved") {
+      return res.status(404).json({ message: "File not found" });
+    }
 
     return res.redirect(note.fileUrl);
 
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
   }
-
-  catch {
-
-    res.status(500).json({
-      message: "Internal Server Error",
-    });
-
-  }
-
 };
-
 
 
 
