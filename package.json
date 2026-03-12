@@ -13,13 +13,17 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/genai": "^1.44.0",
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.50.5",
+    "axios": "^1.13.6",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "firebase-admin": "^13.6.1",
+    "fuse.js": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",
     "mongoose": "^8.21.1",
@@ -27,6 +31,8 @@
     "multer-storage-cloudinary": "^4.0.0",
     "node-fetch": "^2.7.0",
     "pdf-lib": "^1.17.1",
+    "pdf2pic": "^3.2.0",
+    "tesseract.js": "^7.0.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

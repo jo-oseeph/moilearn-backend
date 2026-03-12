@@ -7,6 +7,7 @@ import noteRoutes from './routes/noteRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import userRoutes from "./routes/userRoutes.js";
 import publicStatsRoutes from "./routes/publicStatsRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 
 
 connectDB();
@@ -54,7 +55,7 @@ app.use('/api/notes', noteRoutes);
 app.use('/api/user', userRoutes);  
 app.use('/api/admin', adminRoutes);
 app.use("/api/public-stats", publicStatsRoutes);
-
+app.use("/api/ai", aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
