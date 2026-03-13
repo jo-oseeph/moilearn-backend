@@ -110,7 +110,7 @@ export const loginUser = async (req, res) => {
 };
 
 
-// Logs out the user (client should discard the JWT)
+// Logs out the user
 export const logoutUser = async (req, res) => {
   try {
     res.status(200).json({
@@ -125,7 +125,7 @@ export const logoutUser = async (req, res) => {
 };
 
 
-// Sends a password reset link to the user's email
+// Sends password reset link to the user's email
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -136,7 +136,7 @@ export const forgotPassword = async (req, res) => {
 
     const user = await User.findOne({ email: email.toLowerCase().trim() });
 
-    // Generic response — never reveal whether the email is registered
+    // Never reveal whether the email is registered
     if (!user) {
       return res.status(200).json({
         message: "If that email is registered, a reset link has been sent.",
