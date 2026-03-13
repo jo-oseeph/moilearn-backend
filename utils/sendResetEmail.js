@@ -4,7 +4,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendResetEmail = async ({ toEmail, resetUrl, userName }) => {
   await resend.emails.send({
-    from: 'Moilearn <onboarding@resend.dev>', // must be a verified Resend domain
+    from: 'Moilearn <onboarding@resend.dev>', 
     to: toEmail,
     subject: 'Reset your Moilearn password',
     html: `
