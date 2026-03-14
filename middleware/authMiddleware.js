@@ -29,7 +29,7 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// Middleware: Role-based access control
+//  Role-based access control
 export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
