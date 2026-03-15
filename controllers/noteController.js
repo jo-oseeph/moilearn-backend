@@ -262,14 +262,26 @@ export const downloadNote = async (req, res) => {
 
 export const previewNote = async (req, res) => {
   try {
-    const note = await Note.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { previewCount: 1 } },
-      { new: true }
-    );
 
-    if (!note || note.status !== "approved") {
+    const note = await Note.findById(req.params.id);
+
+    if (!note) {
       return res.status(404).json({ message: "File not found" });
+    }
+
+    // Allow preview if:
+    // 1. note is approved
+    // 2. OR requester is admin
+    const isAdmin = req.user && req.user.role === "admin";
+
+    if (note.status !== "approved" && !isAdmin) {
+      return res.status(403).json({ message: "Not authorized to preview this note" });
+    }
+
+    // increment preview count only for approved notes
+    if (note.status === "approved") {
+      note.previewCount += 1;
+      await note.save();
     }
 
     return res.redirect(note.fileUrl);
@@ -279,10 +291,7 @@ export const previewNote = async (req, res) => {
   }
 };
 
-
-
-// remaining functions unchanged
-
+// get approved notes
 
 export const getApprovedNotes = async (req, res) => {
 
