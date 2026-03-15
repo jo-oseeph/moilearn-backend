@@ -258,8 +258,6 @@ export const downloadNote = async (req, res) => {
 };
 
 
-
-
 // preview
 
 export const previewNote = async (req, res) => {
