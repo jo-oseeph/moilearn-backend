@@ -70,7 +70,7 @@ let filePdf;
 try {
 
 
-// IMAGE → convert to PDF first
+// Image convert to PDF first
 if (file.mimetype.startsWith("image/")) {
 
 const imgPdfBytes =
@@ -85,7 +85,7 @@ await PDFDocument.load(imgPdfBytes);
 }
 
 
-// PDF → load directly
+// PDF load directly
 else if (file.mimetype === "application/pdf") {
 
 filePdf =
@@ -134,13 +134,9 @@ message:
 
 }
 
-
-
 // FINAL MERGED PDF
 const finalBuffer =
 await mergedPdf.save();
-
-
 
 
 // UPLOAD TO CLOUDINARY
@@ -166,7 +162,6 @@ message:
 });
 
 }
-
 
 const note = new Note({
   uploader: req.user._id,
@@ -259,8 +254,6 @@ export const downloadNote = async (req, res) => {
 
 
 // preview
-
-// preview
 export const previewNote = async (req, res) => {
   try {
     const note = await Note.findByIdAndUpdate(
@@ -291,7 +284,6 @@ export const getApprovedNotes = async (req, res) => {
   res.json(notes);
 
 };
-
 
 
 export const getMyUploads = async (req, res) => {
