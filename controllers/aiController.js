@@ -1,4 +1,4 @@
-import { extractPaperMetadata } from "../utils/ai/geminiVision.js";
+import { extractPaperMetadata } from "../utils/ai/ocrService.js";
 
 /**
  * POST /api/ai/extract-metadata
