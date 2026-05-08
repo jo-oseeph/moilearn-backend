@@ -120,7 +120,7 @@ export const deleteNote = async (req, res) => {
 // adminController.js
 export const getNotes = async (req, res) => {
   try {
-    const { status } = req.query; // optional: pending, approved, rejected, all
+    const { status } = req.query; 
     let filter = {};
 
     if (status && status !== "all") {
